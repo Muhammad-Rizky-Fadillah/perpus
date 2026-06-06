@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
@@ -166,4 +167,20 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::get('/members/{id}/card', [MemberController::class, 'printCard'])->name('members.printCard');
+
+    
+});
+
+Route::get('/jalankan-migrasi', function() {
+    try {
+        // Menjalankan migrasi database
+        Artisan::call('migrate:fresh', ['--force' => true]);
+        
+        // Menjalankan seeder jika ada (opsional, hapus jika tidak pakai seeder)
+        // Artisan::call('db:seed', ['--force' => true]); 
+        
+        return "Selamat! Struktur tabel perpustakaan sukses dibuat di Supabase Cloud.";
+    } catch (\Exception $e) {
+        return "Gagal migrasi. Error: " . $e->getMessage();
+    }
 });
