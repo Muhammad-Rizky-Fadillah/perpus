@@ -7,28 +7,33 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
+    libwebp-dev \
     libzip-dev \
+    libonig-dev \
     zip \
     unzip \
     git \
     curl \
-    libfontconfig1 \
-    libxrender1 \
-    libxext6 \
-    fonts-dejavu-core \
-    libwebp-dev \
+    build-essential \
+    autoconf \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# =========================
-# GD EXTENSION (FIXED - RAILWAY SAFE)
-# =========================
+RUN docker-php-ext-install \
+    pdo \
+    pdo_mysql \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    zip
+
 RUN docker-php-ext-configure gd \
-    --with-freetype=/usr/include/ \
-    --with-jpeg=/usr/include/ \
+    --with-freetype \
+    --with-jpeg \
     --with-webp
 
 RUN docker-php-ext-install -j$(nproc) gd
-
 # VERIFY GD
 RUN php -m | grep gd
 
