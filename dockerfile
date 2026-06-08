@@ -1,8 +1,11 @@
 FROM php:8.2-fpm
 
+# =========================
+# SYSTEM DEPENDENCIES
+# =========================
 RUN apt-get update && apt-get install -y \
     libpng-dev \
-    libjpeg62-turbo-dev \
+    libjpeg-dev \
     libfreetype6-dev \
     libzip-dev \
     zip \
@@ -17,20 +20,20 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # =========================
-# INSTALL GD (FORCE VALIDATED)
+# GD EXTENSION (FIXED - RAILWAY SAFE)
 # =========================
 RUN docker-php-ext-configure gd \
-    --with-freetype \
-    --with-jpeg \
+    --with-freetype=/usr/include/ \
+    --with-jpeg=/usr/include/ \
     --with-webp
 
 RUN docker-php-ext-install -j$(nproc) gd
 
-# VERIFY GD INSTALLED (INI PENTING)
+# VERIFY GD
 RUN php -m | grep gd
 
 # =========================
-# LARAVEL EXTENSIONS
+# PHP EXTENSIONS
 # =========================
 RUN docker-php-ext-install \
     pdo \
@@ -41,6 +44,9 @@ RUN docker-php-ext-install \
     bcmath \
     zip
 
+# =========================
+# COMPOSER
+# =========================
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
