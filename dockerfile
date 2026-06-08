@@ -1,67 +1,29 @@
-FROM php:8.2-fpm
+FROM php:8.3-cli
 
-# =========================
-# SYSTEM DEPENDENCIES
-# =========================
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libwebp-dev \
-    libzip-dev \
-    libonig-dev \
-    zip \
-    unzip \
     git \
+    unzip \
+    zip \
     curl \
-    build-essential \
-    autoconf \
-    pkg-config \
-    && rm -rf /var/lib/apt/lists/*
+    libzip-dev
 
-RUN docker-php-ext-install \
-    pdo \
-    pdo_mysql \
-    mbstring \
-    exif \
-    pcntl \
-    bcmath \
-    zip
+RUN docker-php-ext-install pdo pdo_mysql mysqli zip
 
-RUN docker-php-ext-configure gd \
-    --with-freetype \
-    --with-jpeg \
-    --with-webp
+# Install Node.js 20
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+RUN apt-get install -y nodejs
 
-RUN docker-php-ext-install -j$(nproc) gd
-# VERIFY GD
-RUN php -m | grep gd
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# =========================
-# PHP EXTENSIONS
-# =========================
-RUN docker-php-ext-install \
-    pdo \
-    pdo_mysql \
-    mbstring \
-    exif \
-    pcntl \
-    bcmath \
-    zip
-
-# =========================
-# COMPOSER
-# =========================
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-WORKDIR /var/www
+WORKDIR /app
 
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
-RUN chmod -R 775 storage bootstrap/cache
+RUN npm install
+RUN npm run production
 
-EXPOSE 8000
+EXPOSE 8080
 
-CMD php artisan serve --host=0.0.0.0 --port=8000
+CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
