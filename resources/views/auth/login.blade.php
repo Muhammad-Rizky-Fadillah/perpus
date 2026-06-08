@@ -117,8 +117,6 @@
                                 </label>
                             </div>
 
-                            <div class="g-recaptcha" data-sitekey="{{ config('captcha.sitekey') }}"></div>
-
                             <button type="submit" class="btn btn-primary btn-user btn-block">
                                 Login
                             </button>
@@ -152,7 +150,7 @@
     <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('vendor/jquery-easing/jquery.easing.min.js') }}"></script>
     <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 
 </body>
 
