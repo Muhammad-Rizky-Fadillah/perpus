@@ -1,8 +1,6 @@
-FROM php:8.2-cli
+FROM php:8.3-cli
 
-# =========================
-# SYSTEM DEPENDENCIES
-# =========================
+# 1. Install sistem dependensi termasuk library untuk GD
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -10,71 +8,30 @@ RUN apt-get update && apt-get install -y \
     curl \
     libzip-dev \
     libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libwebp-dev \
-    libonig-dev \
-    build-essential \
-    autoconf \
-    pkg-config \
-    gnupg \
-    && rm -rf /var/lib/apt/lists/*
+    libjpeg62-turbo-dev \
+    libfreetype6-dev
 
-# =========================
-# PHP EXTENSIONS (CORE LARAVEL)
-# =========================
-RUN docker-php-ext-install \
-    pdo \
-    pdo_mysql \
-    mysqli \
-    mbstring \
-    exif \
-    zip
+# 2. Konfigurasi dan Install ekstensi PHP (termasuk GD)
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql mysqli zip gd
 
-# =========================
-# GD EXTENSION (WAJIB DOMPDF)
-# =========================
-RUN docker-php-ext-configure gd \
-    --with-freetype \
-    --with-jpeg \
-    --with-webp
-
-RUN docker-php-ext-install -j$(nproc) gd
-
-# VERIFY GD
-RUN php -m | grep gd
-
-# =========================
-# NODEJS 20
-# =========================
+# Install Node.js 20
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
-# =========================
-# COMPOSER
-# =========================
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
 COPY . .
 
-# =========================
-# INSTALL DEPENDENCIES
-# =========================
 RUN composer install --no-dev --optimize-autoloader
 
 RUN npm install
-RUN npm run production
+# Catatan: Laravel modern menggunakan Vite (npm run build). 
+# Jika Anda masih menggunakan Laravel Mix, tetap gunakan npm run production.
+RUN npm run build || npm run production
 
-# =========================
-# PERMISSION FIX
-# =========================
-RUN chmod -R 775 storage bootstrap/cache
-
-# =========================
-# PORT
-# =========================
 EXPOSE 8080
 
-CMD ["php", "-S", "0.0.0.0:8080", "-t", "public"]
+CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
