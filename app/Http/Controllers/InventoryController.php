@@ -88,8 +88,9 @@ class InventoryController extends Controller
         return Redirect::route('show_inventory');
     }
 
-    public function cetak_inventory(Request $request)
-    {
+  public function cetak_inventory(Request $request)
+{
+    try {
         $query = Inventory::query();
 
         if ($request->tahun) {
@@ -98,16 +99,21 @@ class InventoryController extends Controller
 
         $inventories = $query->get();
 
-        $pdf = Pdf::loadView('cetak_inventory', [
-                'inventories' => $inventories
-            ])
-            ->setPaper('A4', 'portrait')
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('cetak_inventory', compact('inventories'))
+            ->setPaper('a4', 'portrait')
             ->setOptions([
                 'isRemoteEnabled' => true,
                 'isHtml5ParserEnabled' => true,
-                'defaultFont' => 'DejaVu Sans'
             ]);
 
-        return $pdf->stream('laporan_inventaris.pdf');
+        return $pdf->stream();
+
+    } catch (\Throwable $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ], 500);
     }
+}
 }
