@@ -1,4 +1,4 @@
-FROM php:8.3-cli
+FROM php:8.2-cli
 
 # =========================
 # SYSTEM DEPENDENCIES
@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # =========================
-# PHP EXTENSIONS
+# PHP EXTENSIONS (CORE LARAVEL)
 # =========================
 RUN docker-php-ext-install \
     pdo \
@@ -32,7 +32,7 @@ RUN docker-php-ext-install \
     zip
 
 # =========================
-# GD EXTENSION (IMPORTANT FOR DOMPDF)
+# GD EXTENSION (WAJIB DOMPDF)
 # =========================
 RUN docker-php-ext-configure gd \
     --with-freetype \
@@ -68,7 +68,7 @@ RUN npm install
 RUN npm run production
 
 # =========================
-# PERMISSION
+# PERMISSION FIX
 # =========================
 RUN chmod -R 775 storage bootstrap/cache
 
