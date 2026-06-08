@@ -12,18 +12,26 @@ RUN apt-get update && apt-get install -y \
     libfontconfig1 \
     libxrender1 \
     libxext6 \
-    fonts-dejavu-core
+    fonts-dejavu-core \
+    libwebp-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # =========================
-# FORCE GD INSTALL (IMPORTANT)
+# INSTALL GD (FORCE VALIDATED)
 # =========================
 RUN docker-php-ext-configure gd \
     --with-freetype \
-    --with-jpeg
+    --with-jpeg \
+    --with-webp
 
-RUN docker-php-ext-install gd
+RUN docker-php-ext-install -j$(nproc) gd
 
-# Laravel extensions
+# VERIFY GD INSTALLED (INI PENTING)
+RUN php -m | grep gd
+
+# =========================
+# LARAVEL EXTENSIONS
+# =========================
 RUN docker-php-ext-install \
     pdo \
     pdo_mysql \
