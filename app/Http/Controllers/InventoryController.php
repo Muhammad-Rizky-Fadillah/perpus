@@ -88,18 +88,26 @@ class InventoryController extends Controller
         return Redirect::route('show_inventory');
     }
 
-    public function cetak_inventory(request $request)
+    public function cetak_inventory(Request $request)
     {
-    $query = Inventory::query();
+        $query = Inventory::query();
 
-    if ($request->tahun) {
-        $query->where('tahun', $request->tahun);
-    }
+        if ($request->tahun) {
+            $query->where('tahun', $request->tahun);
+        }
 
-    $inventories = $query->get();
+        $inventories = $query->get();
 
-    $pdf = Pdf::loadView('cetak_inventory', compact('inventories'))->setPaper('a4', 'portrait');
+        $pdf = Pdf::loadView('cetak_inventory', [
+                'inventories' => $inventories
+            ])
+            ->setPaper('A4', 'portrait')
+            ->setOptions([
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+                'defaultFont' => 'DejaVu Sans'
+            ]);
 
-    return $pdf->stream('laporan_inventaris.pdf');
+        return $pdf->stream('laporan_inventaris.pdf');
     }
 }
