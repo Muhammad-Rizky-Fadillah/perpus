@@ -106,7 +106,7 @@ th {
 <br><br>
 
 <div style="text-align:right;">
-<p>Kuala Kapuas, {{ Carbon::now()->translatedFormat('d F Y') }}</p>
+<p>Kuala Kapuas,{{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y') }}</p>
 <p>Kepala Perpustakaan</p>
 <br><br><br>
 <p><u>_________________________</u></p>
