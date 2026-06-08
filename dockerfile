@@ -1,11 +1,9 @@
 FROM php:8.2-fpm
 
-# =========================
-# Install system dependencies
-# =========================
+# Install dependencies wajib GD + Laravel + PDF
 RUN apt-get update && apt-get install -y \
     libpng-dev \
-    libjpeg-dev \
+    libjpeg62-turbo-dev \
     libfreetype6-dev \
     libzip-dev \
     zip \
@@ -16,17 +14,13 @@ RUN apt-get update && apt-get install -y \
     libxrender1 \
     libxext6 \
     fonts-dejavu-core \
-    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# =========================
-# Install PHP extensions
-# =========================
-RUN docker-php-ext-configure gd \
-    --with-freetype \
-    --with-jpeg \
+# Install GD (FIX UTAMA)
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd
 
+# Laravel extensions
 RUN docker-php-ext-install \
     pdo \
     pdo_mysql \
@@ -36,38 +30,18 @@ RUN docker-php-ext-install \
     bcmath \
     zip
 
-# =========================
-# Install Composer
-# =========================
+# Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# =========================
-# Set working directory
-# =========================
 WORKDIR /var/www
 
-# =========================
-# Copy project
-# =========================
 COPY . .
 
-# =========================
-# Install dependencies
-# =========================
 RUN composer install --no-dev --optimize-autoloader
 
-# =========================
-# Permissions (IMPORTANT)
-# =========================
-RUN chown -R www-data:www-data /var/www \
-    && chmod -R 775 storage bootstrap/cache
+# Permission fix (penting di Railway)
+RUN chmod -R 775 storage bootstrap/cache
 
-# =========================
-# Expose port
-# =========================
 EXPOSE 8000
 
-# =========================
-# Run Laravel
-# =========================
 CMD php artisan serve --host=0.0.0.0 --port=8000
