@@ -1,29 +1,36 @@
-FROM php:8.3-cli
+FROM php:8.2-fpm
 
+# Install dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
     zip \
-    curl \
-    libzip-dev
+    unzip \
+    git \
+    curl
 
-RUN docker-php-ext-install pdo pdo_mysql mysqli zip
+# Install GD extension
+RUN docker-php-ext-configure gd \
+    --with-freetype \
+    --with-jpeg \
+    && docker-php-ext-install gd
 
-# Install Node.js 20
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-RUN apt-get install -y nodejs
+# Install extensions umum Laravel
+RUN docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-WORKDIR /app
+WORKDIR /var/www
 
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
-RUN npm install
-RUN npm run production
+# Permissions
+RUN chown -R www-data:www-data /var/www
 
-EXPOSE 8080
+EXPOSE 8000
 
-CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+CMD php artisan serve --host=0.0.0.0 --port=8000
