@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Validator;
 use Anhskohbo\NoCaptcha\Rules\Captcha;
 use Illuminate\Support\Facades\URL;
+use Carbon\Carbon;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,5 +33,7 @@ public function boot()
     if (app()->environment('production')) {
         URL::forceScheme('https');
     }
+    Carbon::setLocale('id');
 }
+
 }
