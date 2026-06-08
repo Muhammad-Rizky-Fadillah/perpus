@@ -1,6 +1,8 @@
 FROM php:8.2-fpm
 
-# Install dependencies wajib GD + Laravel + PDF
+# =============================
+# System dependencies (FIXED)
+# =============================
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg62-turbo-dev \
@@ -16,11 +18,17 @@ RUN apt-get update && apt-get install -y \
     fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
-# Install GD (FIX UTAMA)
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd
+# =============================
+# FIX GD EXTENSION (IMPORTANT)
+# =============================
+RUN docker-php-ext-configure gd \
+    --with-freetype=/usr/include/ \
+    --with-jpeg=/usr/include/ \
+    && docker-php-ext-install -j$(nproc) gd
 
+# =============================
 # Laravel extensions
+# =============================
 RUN docker-php-ext-install \
     pdo \
     pdo_mysql \
@@ -30,7 +38,9 @@ RUN docker-php-ext-install \
     bcmath \
     zip
 
+# =============================
 # Composer
+# =============================
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
@@ -39,7 +49,6 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
-# Permission fix (penting di Railway)
 RUN chmod -R 775 storage bootstrap/cache
 
 EXPOSE 8000
