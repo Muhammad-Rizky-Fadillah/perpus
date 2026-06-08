@@ -184,14 +184,15 @@ Route::get('/jalankan-migrasi', function() {
         return "Gagal migrasi. Error: " . $e->getMessage();
     }
 
+
+
+
+});
+
     Route::get('/gd-check', function () {
     return [
         'gd' => extension_loaded('gd'),
         'extensions' => get_loaded_extensions()
     ];
 });
-
-
-});
-
 
