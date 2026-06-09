@@ -90,7 +90,30 @@ class InventoryController extends Controller
 
   public function cetak_inventory(Request $request)
 {
-    $pdf = PDF::loadHTML('<h1>Test PDF</h1>');
-return $pdf->stream();
+    try {
+        $query = Inventory::query();
+
+        if ($request->tahun) {
+            $query->where('tahun', $request->tahun);
+        }
+
+        $inventories = $query->get();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML('cetak_inventory', compact('inventories'))
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+            ]);
+
+        return $pdf->stream();
+
+    } catch (\Throwable $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ], 500);
+    }
 }
 }
