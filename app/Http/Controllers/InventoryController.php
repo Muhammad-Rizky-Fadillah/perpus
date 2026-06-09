@@ -99,14 +99,16 @@ class InventoryController extends Controller
 
         $inventories = $query->get();
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML('cetak_inventory', compact('inventories'))
+        $html = view('cetak_inventory', compact('inventories'))->render();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)
             ->setPaper('a4', 'portrait')
             ->setOptions([
                 'isRemoteEnabled' => true,
                 'isHtml5ParserEnabled' => true,
             ]);
 
-        return $pdf->stream();
+        return $pdf->stream('inventaris.pdf');
 
     } catch (\Throwable $e) {
         return response()->json([
