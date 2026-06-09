@@ -109,7 +109,7 @@ class BookController extends Controller
     {
         $books = Book::with('category')->get();
 
-        $pdf = Pdf::loadHTML('cetak_book', compact('books'))
+        $pdf = Pdf::loadView('cetak_book', compact('books'))
             ->setPaper('A4', 'portrait');
 
         return $pdf->stream('Daftar-Buku.pdf');
