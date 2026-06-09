@@ -1,6 +1,12 @@
 {
-  "$schema": "https://railway.app/railway.schema.json",
-  "deploy": {
-    "startCommand": "php artisan serve --host=0.0.0.0 --port=$PORT"
+  "$schema": "https://railway.com/railpack/schema.json",
+  "php": {
+    "extensions": [
+      "gd",
+      "pdo_mysql",
+      "zip",
+      "exif",
+      "bcmath"
+    ]
   }
 }
