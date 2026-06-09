@@ -52,7 +52,7 @@ th {
 <table style="border: none; margin-bottom: 15px;">
     <tr>
         <td style="border:none; width:100px;">
-            <img src="data:image/png;base64,{{ $logo }}" style="width:80px;">
+            <img src="{{ public_path('img/logo-sma.png') }}" width="80">
         </td>
         <td style="border:none; text-align:center;">
             <h3 style="margin:0;">LAPORAN INVENTARIS PERPUSTAKAAN</h3>
