@@ -44,16 +44,10 @@ th {
 
 <body>
 
-@php
-    $logoPath = public_path('img/logo-sma.png');
-    $logo = base64_encode(file_get_contents($logoPath));
-@endphp
+
 
 <table style="border: none; margin-bottom: 15px;">
     <tr>
-        <td style="border:none; width:100px;">
-            <img src="{{ public_path('img/logo-sma.png') }}" width="80">
-        </td>
         <td style="border:none; text-align:center;">
             <h3 style="margin:0;">LAPORAN INVENTARIS PERPUSTAKAAN</h3>
             <p style="margin:0;">SMA Muhammadiyah Kuala Kapuas</p>
