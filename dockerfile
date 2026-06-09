@@ -1,37 +1,63 @@
 FROM php:8.3-cli
 
-# 1. Install sistem dependensi termasuk library untuk GD
+# Install dependencies sistem
 RUN apt-get update && apt-get install -y \
     git \
+    curl \
     unzip \
     zip \
-    curl \
     libzip-dev \
     libpng-dev \
     libjpeg62-turbo-dev \
-    libfreetype6-dev
+    libfreetype6-dev \
+    libonig-dev \
+    libxml2-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# 2. Konfigurasi dan Install ekstensi PHP (termasuk GD)
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql mysqli zip gd
+# Install PHP Extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
+    docker-php-ext-install \
+    pdo \
+    pdo_mysql \
+    mysqli \
+    bcmath \
+    exif \
+    zip \
+    gd
 
 # Install Node.js 20
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
+# Copy source code
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader
+# Install dependency PHP
+RUN composer install \
+    --no-dev \
+    --optimize-autoloader \
+    --no-interaction
 
-RUN npm install
-# Catatan: Laravel modern menggunakan Vite (npm run build). 
-# Jika Anda masih menggunakan Laravel Mix, tetap gunakan npm run production.
-RUN npm run build || npm run production
+# Install dependency frontend
+RUN npm ci || npm install
 
+# Build assets
+RUN npm run build || npm run production || true
+
+# Laravel permissions
+RUN mkdir -p storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/logs && \
+    chmod -R 775 storage bootstrap/cache
+
+# Railway port
 EXPOSE 8080
 
-CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+# Start application
+CMD ["sh", "-c", "php artisan config:clear && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]
